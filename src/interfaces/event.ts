@@ -1,7 +1,9 @@
 import { EventType } from '../enums/event-type';
 
 export interface IEvent<T> {
-  id: string;
+  eventId: string;
+
+  aggregateId: string;
 
   type: EventType;
 

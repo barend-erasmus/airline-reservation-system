@@ -1,38 +1,49 @@
 import * as mongodb from 'mongodb';
 import { IEvent } from '../interfaces/event';
+import { EventType } from '../enums/event-type';
+import { handleAirlineRegisterEvent } from '../handlers/airline';
 
-export async function publishEvent(
-  getColllection: () => Promise<mongodb.Collection>,
-  eventHandlers: {},
-  event: IEvent<any>,
-): Promise<void> {
-  const collection: mongodb.Collection = await getColllection();
+export async function publishEvent(event: IEvent<any>): Promise<void> {
+  const collection: mongodb.Collection = await getCollection();
 
-  await collection.insertOne(event);
+  const insertOneWriteOpResult: mongodb.InsertOneWriteOpResult = await collection.insertOne({
+    aggregateId: event.aggregateId,
+    type: event.type,
+    payload: event.payload,
+  });
 
-  const eventHandler: (event: IEvent<any>) => Promise<void> = eventHandlers[event.type];
-
-  if (!eventHandler) {
-    return;
+  switch (event.type) {
+    case EventType.AIRLINE_REGISTER:
+      await handleAirlineRegisterEvent({
+        ...event,
+        eventId: insertOneWriteOpResult.insertedId.toHexString(),
+      });
+      break;
   }
-
-  await eventHandler(event);
 }
 
 export async function hydrateFromEventStore(
-  getColllection: () => Promise<mongodb.Collection>,
-  hydrate: (getEvent: () => Promise<IEvent<any>>, obj: any) => Promise<any>,
-  id: string,
+  hydrate: (getEvent: () => Promise<IEvent<any>>) => Promise<any>,
+  aggregateId: string,
 ): Promise<any> {
-  const collection: mongodb.Collection = await getColllection();
+  const collection: mongodb.Collection = await getCollection();
 
-  const cursor: mongodb.Cursor = collection.find({
-    id: id,
-  });
+  const cursor: mongodb.Cursor = collection
+    .find({
+      aggregateId,
+    })
+    .sort({ _id: 1 });
 
+  return hydrateFromCursor(cursor, hydrate);
+}
+
+export async function hydrateFromCursor(
+  cursor: mongodb.Cursor,
+  hydrate: (getEvent: () => Promise<IEvent<any>>) => Promise<any>,
+): Promise<any> {
   const getEvent: () => Promise<IEvent<any>> = async () => {
     const hasNext: boolean = await cursor.hasNext();
-    
+
     if (!hasNext) {
       return null;
     }
@@ -40,32 +51,25 @@ export async function hydrateFromEventStore(
     const event: any = await cursor.next();
 
     return {
-      id: event._id,
+      eventId: event._id,
+      aggregateId: event.aggregateId,
       type: event.type,
       payload: event.payload,
     };
   };
 
-  return hydrate(getEvent, null);
+  return hydrate(getEvent);
 }
 
-export function getCollectionBuilder(): () => Promise<mongodb.Collection> {
-  let collection: mongodb.Collection = null;
+export async function getCollection(): Promise<mongodb.Collection> {
+  const client: mongodb.MongoClient = await mongodb.connect(
+    'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+    { useNewUrlParser: true },
+  );
 
-  return async () => {
-    if (collection) {
-      return collection;
-    }
+  const database: mongodb.Db = client.db('airline-reservation-system');
 
-    const client: mongodb.MongoClient = await mongodb.connect(
-      'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
-      { useNewUrlParser: true },
-    );
+  const collection: mongodb.Collection = database.collection('events');
 
-    const database: mongodb.Db = client.db('airline-reservation-system');
-
-    collection = database.collection('events');
-
-    return collection;
-  };
+  return collection;
 }
