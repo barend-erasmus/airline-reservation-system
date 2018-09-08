@@ -13,7 +13,7 @@ import { hydrateAirlineFromEventStore } from './aggregates/airline';
   await publishEvent({
     eventId: null,
     aggregateId: MOCKS.airlines[0].iataCode,
-    type: EventType.AIRLINE_REGISTER,
+    type: EventType.AIRLINE_REGISTER_REQUEST,
     payload: MOCKS.airlines[0],
   });
 

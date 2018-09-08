@@ -1,7 +1,7 @@
 import * as mongodb from 'mongodb';
 import { IEvent } from '../interfaces/event';
 import { EventType } from '../enums/event-type';
-import { handleAirlineRegisterEvent } from '../handlers/airline';
+import { handleAirlineRegisterRequestEvent } from '../handlers/airline';
 
 export async function publishEvent(event: IEvent<any>): Promise<void> {
   const collection: mongodb.Collection = await getCollection();
@@ -13,8 +13,8 @@ export async function publishEvent(event: IEvent<any>): Promise<void> {
   });
 
   switch (event.type) {
-    case EventType.AIRLINE_REGISTER:
-      await handleAirlineRegisterEvent({
+    case EventType.AIRLINE_REGISTER_REQUEST:
+      await handleAirlineRegisterRequestEvent({
         ...event,
         eventId: insertOneWriteOpResult.insertedId.toHexString(),
       });

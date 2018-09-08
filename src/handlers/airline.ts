@@ -4,7 +4,7 @@ import { IAirline } from '../interfaces/airline';
 import { publishEvent } from '../persistence/event-store';
 import { EventType } from '../enums/event-type';
 
-export async function handleAirlineRegisterEvent(event: IEvent<any>): Promise<void> {
+export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Promise<void> {
   const existingAirline: IAirline = await hydrateAirlineFromEventStore(event.aggregateId);
   
   if (existingAirline) {
