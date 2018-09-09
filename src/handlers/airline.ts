@@ -8,6 +8,13 @@ export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Pro
   const existingAirline: IAirline = await hydrateAirlineFromEventStore(event.aggregateId);
   
   if (existingAirline) {
+    await publishEvent({
+      eventId: null,
+      aggregateId: event.aggregateId,
+      type: EventType.AIRLINE_REGISTER_FAIL,
+      payload: event.payload,
+    });
+
     return;
   }
 

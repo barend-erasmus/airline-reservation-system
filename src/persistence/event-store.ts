@@ -2,6 +2,7 @@ import * as mongodb from 'mongodb';
 import { IEvent } from '../interfaces/event';
 import { EventType } from '../enums/event-type';
 import { handleAirlineRegisterRequestEvent } from '../handlers/airline';
+import { handlePassengerRegisterRequestEvent } from '../handlers/passenger';
 
 export async function publishEvent(event: IEvent<any>): Promise<void> {
   const collection: mongodb.Collection = await getCollection();
@@ -19,11 +20,18 @@ export async function publishEvent(event: IEvent<any>): Promise<void> {
         eventId: insertOneWriteOpResult.insertedId.toHexString(),
       });
       break;
+    case EventType.PASSENGER_REGISTER_REQUEST:
+      await handlePassengerRegisterRequestEvent({
+        ...event,
+        eventId: insertOneWriteOpResult.insertedId.toHexString(),
+      });
+      break;
   }
 }
 
 export async function hydrateFromEventStore(
-  hydrate: (getEvent: () => Promise<IEvent<any>>) => Promise<any>,
+  applyEvent: (obj: any, event: IEvent<any>) => any,
+  obj: any,
   aggregateId: string,
 ): Promise<any> {
   const collection: mongodb.Collection = await getCollection();
@@ -34,36 +42,40 @@ export async function hydrateFromEventStore(
     })
     .sort({ _id: 1 });
 
-  return hydrateFromCursor(cursor, hydrate);
-}
+  let appliedObj: any = obj;
 
-export async function hydrateFromCursor(
-  cursor: mongodb.Cursor,
-  hydrate: (getEvent: () => Promise<IEvent<any>>) => Promise<any>,
-): Promise<any> {
-  const getEvent: () => Promise<IEvent<any>> = async () => {
-    const hasNext: boolean = await cursor.hasNext();
+  while (await cursor.hasNext()) {
+    const document: any = await cursor.next();
 
-    if (!hasNext) {
-      return null;
-    }
-
-    const event: any = await cursor.next();
-
-    return {
-      eventId: event._id,
-      aggregateId: event.aggregateId,
-      type: event.type,
-      payload: event.payload,
+    const event: IEvent<any> = {
+      eventId: document._id,
+      aggregateId: document.aggregateId,
+      type: document.type,
+      payload: document.payload,
     };
-  };
 
-  return hydrate(getEvent);
+    appliedObj = applyEvent(obj, event);
+  }
+
+  return appliedObj;
 }
+
+// export async function getCollection(): Promise<mongodb.Collection> {
+//   const client: mongodb.MongoClient = await mongodb.connect(
+//     'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+//     { useNewUrlParser: true },
+//   );
+
+//   const database: mongodb.Db = client.db('airline-reservation-system');
+
+//   const collection: mongodb.Collection = database.collection('events');
+
+//   return collection;
+// }
 
 export async function getCollection(): Promise<mongodb.Collection> {
   const client: mongodb.MongoClient = await mongodb.connect(
-    'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+    'mongodb://127.0.0.1:27017/test',
     { useNewUrlParser: true },
   );
 

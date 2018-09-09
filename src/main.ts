@@ -4,11 +4,15 @@ import { MOCKS } from './constants/mocks';
 import { IAirline } from './interfaces/airline';
 import { EventType } from './enums/event-type';
 import { hydrateAirlineFromEventStore } from './aggregates/airline';
+import { IPassenger } from './interfaces/passenger';
+import { hydratePassengerFromEventStore } from './aggregates/passenger';
 
 (async () => {
   const collection: mongodb.Collection = await getCollection();
 
-  await collection.drop();
+  try {
+    await collection.drop();
+  } catch {}
 
   await publishEvent({
     eventId: null,
@@ -20,4 +24,15 @@ import { hydrateAirlineFromEventStore } from './aggregates/airline';
   const airline: IAirline = await hydrateAirlineFromEventStore(MOCKS.airlines[0].iataCode);
 
   console.log(airline);
+
+  await publishEvent({
+    eventId: null,
+    aggregateId: MOCKS.passengers[0].passportNumber,
+    type: EventType.PASSENGER_REGISTER_REQUEST,
+    payload: MOCKS.passengers[0],
+  });
+
+  const passenger: IPassenger = await hydratePassengerFromEventStore(MOCKS.passengers[0].passportNumber);
+
+  console.log(passenger);
 })();
