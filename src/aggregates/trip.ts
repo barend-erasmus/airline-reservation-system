@@ -6,18 +6,18 @@ import { COLLECTIONS } from '../constants/collections';
 
 export function applyEventToTrip(trip: ITrip, event: IEvent<any>): ITrip {
   switch (event.type) {
-    case EventType.TRIP_REGISTER_SUCCESS:
+    case EventType.TRIP_REGISTRATION_REQUEST_SUCCEEDED:
       return {
         ...event.payload,
         lastAppliedEventId: event.eventId,
       };
-    case EventType.TRIP_SEAT_RESERVE_REQUEST:
+    case EventType.TRIP_SEAT_RESERVATION_REQUEST:
       return {
         ...trip,
         numberOfSeatRemaining: trip.numberOfSeatRemaining - 1,
         lastAppliedEventId: event.eventId,
       };
-    case EventType.TRIP_SEAT_RESERVE_FAIL:
+    case EventType.TRIP_SEAT_RESERVATION_REQUEST_FAILED:
       return {
         ...trip,
         numberOfSeatRemaining: trip.numberOfSeatRemaining + 1,

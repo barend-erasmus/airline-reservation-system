@@ -6,12 +6,12 @@ import { publishToEventBus } from '../event-bus';
 
 export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Promise<void> {
   const existingAirline: IAirline = await hydrateAirline(event.aggregateId);
-  
+
   if (existingAirline) {
     await publishToEventBus({
       eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.AIRLINE_REGISTER_FAIL,
+      type: EventType.AIRLINE_REGISTRATION_REQUEST_FAILED,
       payload: event.payload,
     });
 
@@ -21,7 +21,9 @@ export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Pro
   await publishToEventBus({
     eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.AIRLINE_REGISTER_SUCCESS,
+    type: EventType.AIRLINE_REGISTRATION_REQUEST_SUCCEEDED,
     payload: event.payload,
   });
 }
+
+// export async function handleAirlineRegisterSucce

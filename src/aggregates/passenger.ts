@@ -6,7 +6,7 @@ import { COLLECTIONS } from '../constants/collections';
 
 export function applyEventToPassenger(passenger: IPassenger, event: IEvent<any>): IPassenger {
   switch (event.type) {
-    case EventType.PASSENGER_REGISTER_SUCCESS:
+    case EventType.PASSENGER_REGISTRATION_REQUEST_SUCCEEDED:
       return {
         ...event.payload,
         lastAppliedEventId: event.eventId,

@@ -6,7 +6,7 @@ import { COLLECTIONS } from '../constants/collections';
 
 export function applyEventToAirline(airline: IAirline, event: IEvent<any>): IAirline {
   switch (event.type) {
-    case EventType.AIRLINE_REGISTER_SUCCESS:
+    case EventType.AIRLINE_REGISTRATION_REQUEST_SUCCEEDED:
       return {
         ...event.payload,
         lastAppliedEventId: event.eventId,
