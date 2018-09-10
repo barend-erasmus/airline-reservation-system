@@ -1,10 +1,12 @@
 import * as mongodb from 'mongodb';
 import { IEvent } from '../interfaces/event';
-import { EventType } from '../enums/event-type';
-import { handleAirlineRegisterRequestEvent } from '../handlers/airline';
-import { handlePassengerRegisterRequestEvent } from '../handlers/passenger';
+import { IAggregate } from '../interfaces/aggregate';
 
-export async function publishEvent(event: IEvent<any>): Promise<void> {
+let client: mongodb.MongoClient = null;
+
+let database: mongodb.Db = null;
+
+export async function persistEvent(event: IEvent<any>): Promise<IEvent<any>> {
   const collection: mongodb.Collection = await getCollection();
 
   const insertOneWriteOpResult: mongodb.InsertOneWriteOpResult = await collection.insertOne({
@@ -13,56 +15,101 @@ export async function publishEvent(event: IEvent<any>): Promise<void> {
     payload: event.payload,
   });
 
-  switch (event.type) {
-    case EventType.AIRLINE_REGISTER_REQUEST:
-      await handleAirlineRegisterRequestEvent({
-        ...event,
-        eventId: insertOneWriteOpResult.insertedId.toHexString(),
-      });
-      break;
-    case EventType.PASSENGER_REGISTER_REQUEST:
-      await handlePassengerRegisterRequestEvent({
-        ...event,
-        eventId: insertOneWriteOpResult.insertedId.toHexString(),
-      });
-      break;
-  }
+  return {
+    ...event,
+    eventId: insertOneWriteOpResult.insertedId.toHexString(),
+  };
+}
+
+export async function hydrate(
+  type: string,
+  applyEvent: (aggregate: IAggregate, event: IEvent<any>) => IAggregate,
+  aggregateId: string,
+): Promise<IAggregate> {
+  const snapshot: IAggregate = await getSnapshot(type, aggregateId);
+
+  return hydrateFromEventStore(applyEvent, snapshot, aggregateId);
 }
 
 export async function hydrateFromEventStore(
-  applyEvent: (obj: any, event: IEvent<any>) => any,
-  obj: any,
+  applyEvent: (aggregate: IAggregate, event: IEvent<any>) => IAggregate,
+  aggregate: IAggregate,
   aggregateId: string,
-): Promise<any> {
+): Promise<IAggregate> {
   const collection: mongodb.Collection = await getCollection();
 
-  const cursor: mongodb.Cursor = collection
-    .find({
-      aggregateId,
-    })
-    .sort({ _id: 1 });
+  const query: any = { aggregateId };
 
-  let appliedObj: any = obj;
+  if (aggregate) {
+    query._id = { $gt: aggregate.lastAppliedEventId };
+  }
+
+  const cursor: mongodb.Cursor = collection.find(query).sort({ _id: 1 });
+
+  let appliedAggregate: IAggregate = aggregate;
 
   while (await cursor.hasNext()) {
     const document: any = await cursor.next();
 
     const event: IEvent<any> = {
-      eventId: document._id,
+      eventId: document._id.toHexString(),
       aggregateId: document.aggregateId,
       type: document.type,
       payload: document.payload,
     };
 
-    appliedObj = applyEvent(obj, event);
+    appliedAggregate = applyEvent(appliedAggregate, event);
   }
 
-  return appliedObj;
+  return appliedAggregate;
+}
+
+export async function getSnapshot(type: string, aggregateId: string): Promise<IAggregate> {
+  const collection: mongodb.Collection = await getCollection(type);
+
+  const document: any = await collection.findOne({ _id: aggregateId });
+
+  if (!document) {
+    return null;
+  }
+
+  return {
+    ...document.aggregate,
+  };
+}
+
+export async function persistSnapshot(type: string, aggregate: IAggregate): Promise<void> {
+  const collection: mongodb.Collection = await getCollection(type);
+
+  const document: any = await collection.findOne({ _id: aggregate.id });
+
+  if (document) {
+    await collection.replaceOne({ _id: aggregate.id }, { _id: aggregate.id, aggregate });
+  } else {
+    await collection.insertOne({ _id: aggregate.id, aggregate });
+  }
+}
+
+export async function getCollection(collectionName: string = null): Promise<mongodb.Collection> {
+  if (!client) {
+    client = await mongodb.connect(
+      'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+      { useNewUrlParser: true },
+    );
+  }
+
+  if (!database) {
+    database = client.db('airline-reservation-system');
+  }
+
+  const collection: mongodb.Collection = database.collection(collectionName || 'events');
+
+  return collection;
 }
 
 // export async function getCollection(): Promise<mongodb.Collection> {
 //   const client: mongodb.MongoClient = await mongodb.connect(
-//     'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+//     'mongodb://127.0.0.1:27017/test',
 //     { useNewUrlParser: true },
 //   );
 
@@ -72,16 +119,3 @@ export async function hydrateFromEventStore(
 
 //   return collection;
 // }
-
-export async function getCollection(): Promise<mongodb.Collection> {
-  const client: mongodb.MongoClient = await mongodb.connect(
-    'mongodb://127.0.0.1:27017/test',
-    { useNewUrlParser: true },
-  );
-
-  const database: mongodb.Db = client.db('airline-reservation-system');
-
-  const collection: mongodb.Collection = database.collection('events');
-
-  return collection;
-}

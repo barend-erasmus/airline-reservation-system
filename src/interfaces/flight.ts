@@ -1,4 +1,6 @@
-export interface IFlight {
+import { IAggregate } from './aggregate';
+
+export interface IFlight extends IAggregate {
   airlineIATACode: string;
 
   flightNumber: string;

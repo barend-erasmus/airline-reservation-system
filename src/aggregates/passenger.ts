@@ -1,21 +1,27 @@
 import { IEvent } from '../interfaces/event';
-import { IAirline } from '../interfaces/airline';
 import { EventType } from '../enums/event-type';
-import { hydrateFromEventStore } from '../persistence/event-store';
+import { hydrateFromEventStore, hydrate } from '../persistence/event-store';
 import { IPassenger } from '../interfaces/passenger';
+import { COLLECTIONS } from '../constants/collections';
 
-export async function applyEventToPassenger(passenger: IPassenger, event: IEvent<any>): Promise<IPassenger> {
+export function applyEventToPassenger(passenger: IPassenger, event: IEvent<any>): IPassenger {
   switch (event.type) {
     case EventType.PASSENGER_REGISTER_SUCCESS:
       return {
         ...event.payload,
+        lastAppliedEventId: event.eventId,
       };
-      break;
     default:
       return passenger;
   }
 }
 
-export async function hydratePassengerFromEventStore(id: string): Promise<IPassenger> {
-  return hydrateFromEventStore(applyEventToPassenger, null, id);
+export async function hydratePassengerFromEventStore(aggregateId: string): Promise<IPassenger> {
+  return hydrateFromEventStore(applyEventToPassenger, null, aggregateId) as Promise<IPassenger>;
+}
+
+export async function hydratePassenger(
+  aggregateId: string,
+): Promise<IPassenger> {
+  return hydrate(COLLECTIONS.PASSENGER, applyEventToPassenger, aggregateId) as Promise<IPassenger>;
 }

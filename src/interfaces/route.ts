@@ -1,6 +1,8 @@
-export interface IRoute {
-    fromAirportCode: string;
-    toAirportCode: string;
+import { IAggregate } from './aggregate';
 
-    durationInMinutes: number;
+export interface IRoute extends IAggregate {
+  fromAirportCode: string;
+  toAirportCode: string;
+
+  durationInMinutes: number;
 }

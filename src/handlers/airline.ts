@@ -1,14 +1,14 @@
 import { IEvent } from '../interfaces/event';
-import { hydrateAirlineFromEventStore } from '../aggregates/airline';
+import { hydrateAirline } from '../aggregates/airline';
 import { IAirline } from '../interfaces/airline';
-import { publishEvent } from '../persistence/event-store';
 import { EventType } from '../enums/event-type';
+import { publishToEventBus } from '../event-bus';
 
 export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Promise<void> {
-  const existingAirline: IAirline = await hydrateAirlineFromEventStore(event.aggregateId);
+  const existingAirline: IAirline = await hydrateAirline(event.aggregateId);
   
   if (existingAirline) {
-    await publishEvent({
+    await publishToEventBus({
       eventId: null,
       aggregateId: event.aggregateId,
       type: EventType.AIRLINE_REGISTER_FAIL,
@@ -18,7 +18,7 @@ export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Pro
     return;
   }
 
-  await publishEvent({
+  await publishToEventBus({
     eventId: null,
     aggregateId: event.aggregateId,
     type: EventType.AIRLINE_REGISTER_SUCCESS,

@@ -1,4 +1,6 @@
-export interface IAirline {
+import { IAggregate } from './aggregate';
+
+export interface IAirline extends IAggregate {
   iataCode: string;
   icaoCode: string;
 
