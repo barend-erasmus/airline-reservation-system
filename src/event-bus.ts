@@ -1,8 +1,9 @@
-import * as mongodb from 'mongodb';
 import { EventEmitter } from 'events';
+import * as mongodb from 'mongodb';
+import { COLLECTIONS } from './constants/collections';
 import { EventType } from './enums/event-type';
 import { IEvent } from './interfaces/event';
-import { persistEvent, getCollection } from './persistence/event-store';
+import { getCollection, persistEvent } from './persistence/event-store';
 
 // const eventEmmiter: EventEmitter = new EventEmitter();
 
@@ -21,7 +22,7 @@ const subscriptions: {} = {};
 // });
 
 setInterval(async () => {
-  const collection: mongodb.Collection = await getCollection('event-bus');
+  const collection: mongodb.Collection = await getCollection(COLLECTIONS.EVENT_BUS);
 
   const document: any = await collection.findOneAndDelete(
     {},
@@ -68,7 +69,7 @@ export function subscribeToEventBus(eventType: EventType, handler: (event: IEven
 export async function publishToEventBus(event: IEvent<any>): Promise<void> {
   const persistedEvent: IEvent<any> = await persistEvent(event);
 
-  const collection: mongodb.Collection = await getCollection('event-bus');
+  const collection: mongodb.Collection = await getCollection(COLLECTIONS.EVENT_BUS);
 
   await collection.insertOne(persistedEvent);
 }

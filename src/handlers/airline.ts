@@ -1,10 +1,13 @@
-import { IEvent } from '../interfaces/event';
+import * as mongodb from 'mongodb';
 import { hydrateAirline } from '../aggregates/airline';
-import { IAirline } from '../interfaces/airline';
+import { COLLECTIONS } from '../constants/collections';
 import { EventType } from '../enums/event-type';
 import { publishToEventBus } from '../event-bus';
+import { IAirline } from '../interfaces/airline';
+import { IEvent } from '../interfaces/event';
+import { getCollection } from '../persistence/event-store';
 
-export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Promise<void> {
+export async function handleAirlineRegistrationRequestEvent(event: IEvent<any>): Promise<void> {
   const existingAirline: IAirline = await hydrateAirline(event.aggregateId);
 
   if (existingAirline) {
@@ -26,4 +29,12 @@ export async function handleAirlineRegisterRequestEvent(event: IEvent<any>): Pro
   });
 }
 
-// export async function handleAirlineRegisterSucce
+export async function handleAirlineRegistrationRequestSucceededEvent(event: IEvent<any>): Promise<void> {
+  const collection: mongodb.Collection = await getCollection(COLLECTIONS.AIRLINE);
+
+  console.log(event.payload);
+
+  await collection.insert({
+    ...event.payload,
+  });
+}

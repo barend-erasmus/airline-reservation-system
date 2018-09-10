@@ -1,8 +1,8 @@
-import { IEvent } from '../interfaces/event';
-import { EventType } from '../enums/event-type';
-import { hydrateFromEventStore, hydrate } from '../persistence/event-store';
-import { ITrip } from '../interfaces/trip';
 import { COLLECTIONS } from '../constants/collections';
+import { EventType } from '../enums/event-type';
+import { IEvent } from '../interfaces/event';
+import { ITrip } from '../interfaces/trip';
+import { hydrate, hydrateFromEventStore } from '../persistence/event-store';
 
 export function applyEventToTrip(trip: ITrip, event: IEvent<any>): ITrip {
   switch (event.type) {
@@ -33,5 +33,5 @@ export async function hydrateTripFromEventStore(aggregateId: string): Promise<IT
 }
 
 export async function hydrateTrip(aggregateId: string): Promise<ITrip> {
-  return hydrate(COLLECTIONS.TRIP, applyEventToTrip, aggregateId) as Promise<ITrip>;
+  return hydrate(COLLECTIONS.TRIP_SNAPSHOT, applyEventToTrip, aggregateId) as Promise<ITrip>;
 }

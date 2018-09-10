@@ -1,5 +1,5 @@
 export interface IAggregate {
-    id: string;
+  id: string;
 
-    lastAppliedEventId: string;
+  lastAppliedEventId: string;
 }

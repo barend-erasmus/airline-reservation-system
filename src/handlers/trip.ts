@@ -1,17 +1,17 @@
-import { IEvent } from '../interfaces/event';
-import { EventType } from '../enums/event-type';
-import { ITrip } from '../interfaces/trip';
 import { hydrateTrip } from '../aggregates/trip';
+import { EventType } from '../enums/event-type';
 import { publishToEventBus } from '../event-bus';
+import { IEvent } from '../interfaces/event';
+import { ITrip } from '../interfaces/trip';
 
-export async function handleTripRegisterRequestEvent(event: IEvent<any>): Promise<void> {
+export async function handleTripRegistrationRequestEvent(event: IEvent<any>): Promise<void> {
   const existingTrip: ITrip = await hydrateTrip(event.aggregateId);
 
   if (existingTrip) {
     await publishToEventBus({
       eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.TRIP_REGISTER_FAIL,
+      type: EventType.TRIP_REGISTRATION_REQUEST_FAILED,
       payload: event.payload,
     });
 
@@ -21,12 +21,12 @@ export async function handleTripRegisterRequestEvent(event: IEvent<any>): Promis
   await publishToEventBus({
     eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.TRIP_REGISTER_SUCCESS,
+    type: EventType.TRIP_REGISTRATION_REQUEST_SUCCEEDED,
     payload: event.payload,
   });
 }
 
-export async function handleTripSeatReserveRequestEvent(event: IEvent<any>): Promise<void> {
+export async function handleTripSeatReservationRequestEvent(event: IEvent<any>): Promise<void> {
   const existingTrip: ITrip = await hydrateTrip(event.aggregateId);
 
   if (!existingTrip) {
@@ -37,7 +37,7 @@ export async function handleTripSeatReserveRequestEvent(event: IEvent<any>): Pro
     await publishToEventBus({
       eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.TRIP_SEAT_RESERVE_FAIL,
+      type: EventType.TRIP_SEAT_RESERVATION_REQUEST_FAILED,
       payload: event.payload,
     });
 
@@ -47,7 +47,7 @@ export async function handleTripSeatReserveRequestEvent(event: IEvent<any>): Pro
   await publishToEventBus({
     eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.TRIP_SEAT_RESERVE_SUCCESS,
+    type: EventType.TRIP_SEAT_RESERVATION_REQUEST_SUCCEEDED,
     payload: event.payload,
   });
 }

@@ -1,4 +1,4 @@
-import { IAggregate } from "./aggregate";
+import { IAggregate } from './aggregate';
 
 export interface IPassenger extends IAggregate {
   firstName: string;

@@ -1,17 +1,17 @@
-import { IEvent } from '../interfaces/event';
-import { EventType } from '../enums/event-type';
 import { hydratePassenger } from '../aggregates/passenger';
-import { IPassenger } from '../interfaces/passenger';
+import { EventType } from '../enums/event-type';
 import { publishToEventBus } from '../event-bus';
+import { IEvent } from '../interfaces/event';
+import { IPassenger } from '../interfaces/passenger';
 
-export async function handlePassengerRegisterRequestEvent(event: IEvent<any>): Promise<void> {
+export async function handlePassengerRegistrationRequestEvent(event: IEvent<any>): Promise<void> {
   const existingPassenger: IPassenger = await hydratePassenger(event.aggregateId);
 
   if (existingPassenger) {
     await publishToEventBus({
       eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.PASSENGER_REGISTER_FAIL,
+      type: EventType.PASSENGER_REGISTRATION_REQUEST_FAILED,
       payload: event.payload,
     });
 
@@ -21,7 +21,7 @@ export async function handlePassengerRegisterRequestEvent(event: IEvent<any>): P
   await publishToEventBus({
     eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.PASSENGER_REGISTER_SUCCESS,
+    type: EventType.PASSENGER_REGISTRATION_REQUEST_SUCCEEDED,
     payload: event.payload,
   });
 }

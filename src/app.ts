@@ -1,8 +1,8 @@
-import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { publishToEventBus } from './event-bus';
-import { EventType } from './enums/event-type';
+import * as express from 'express';
 import { hydrateTrip } from './aggregates/trip';
+import { EventType } from './enums/event-type';
+import { publishToEventBus } from './event-bus';
 import { ITrip } from './interfaces/trip';
 
 const expressApplication: express.Application = express();
@@ -13,7 +13,7 @@ expressApplication.route('/trip/seat/reserve').post(async (request: express.Requ
   await publishToEventBus({
     eventId: null,
     aggregateId: request.body.id,
-    type: EventType.TRIP_SEAT_RESERVE_REQUEST,
+    type: EventType.TRIP_SEAT_RESERVATION_REQUEST,
     payload: {
       passengerId: request.body.passengerId,
     },
@@ -23,11 +23,11 @@ expressApplication.route('/trip/seat/reserve').post(async (request: express.Requ
 });
 
 expressApplication.route('/trip').get(async (request: express.Request, response: express.Response) => {
-    const trip: ITrip = await hydrateTrip(request.query.id);
-  
-    response.json(trip);
-  });
+  const trip: ITrip = await hydrateTrip(request.query.id);
+
+  response.json(trip);
+});
 
 expressApplication.listen(3000, () => {
-    console.log('listening...');
+  console.log('listening...');
 });

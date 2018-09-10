@@ -1,7 +1,7 @@
 import { IAirline } from '../interfaces/airline';
-import { IRoute } from '../interfaces/route';
 import { IFlight } from '../interfaces/flight';
 import { IPassenger } from '../interfaces/passenger';
+import { IRoute } from '../interfaces/route';
 import { ITrip } from '../interfaces/trip';
 
 const airline: IAirline = {

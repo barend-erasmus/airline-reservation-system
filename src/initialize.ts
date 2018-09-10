@@ -1,9 +1,9 @@
 import * as mongodb from 'mongodb';
-import { getCollection } from './persistence/event-store';
+import { COLLECTIONS } from './constants/collections';
 import { MOCKS } from './constants/mocks';
 import { EventType } from './enums/event-type';
-import { COLLECTIONS } from './constants/collections';
 import { publishToEventBus } from './event-bus';
+import { getCollection } from './persistence/event-store';
 
 export async function initialize() {
   const collectionEvents: mongodb.Collection = await getCollection();
@@ -12,35 +12,19 @@ export async function initialize() {
     await collectionEvents.drop();
   } catch {}
 
-  const collectionEventBus: mongodb.Collection = await getCollection('event-bus');
+  for (const collectionKey of Object.keys(COLLECTIONS)) {
+    const collection: mongodb.Collection = await getCollection(COLLECTIONS[collectionKey]);
 
-  try {
-    await collectionEventBus.drop();
-  } catch {}
-
-  const collectionAirlines: mongodb.Collection = await getCollection(COLLECTIONS.AIRLINE);
-
-  try {
-    await collectionAirlines.drop();
-  } catch {}
-
-  const collectionPassengers: mongodb.Collection = await getCollection(COLLECTIONS.PASSENGER);
-
-  try {
-    await collectionPassengers.drop();
-  } catch {}
-
-  const collectionTrips: mongodb.Collection = await getCollection(COLLECTIONS.TRIP);
-
-  try {
-    await collectionTrips.drop();
-  } catch {}
+    try {
+      await collection.drop();
+    } catch {}
+  }
 
   for (const airline of MOCKS.airlines) {
     await publishToEventBus({
       eventId: null,
       aggregateId: airline.id,
-      type: EventType.AIRLINE_REGISTER_REQUEST,
+      type: EventType.AIRLINE_REGISTRATION_REQUEST,
       payload: airline,
     });
   }
@@ -58,7 +42,7 @@ export async function initialize() {
     await publishToEventBus({
       eventId: null,
       aggregateId: passenger.id,
-      type: EventType.PASSENGER_REGISTER_REQUEST,
+      type: EventType.PASSENGER_REGISTRATION_REQUEST,
       payload: passenger,
     });
   }
@@ -76,7 +60,7 @@ export async function initialize() {
     await publishToEventBus({
       eventId: null,
       aggregateId: trip.id,
-      type: EventType.TRIP_REGISTER_REQUEST,
+      type: EventType.TRIP_REGISTRATION_REQUEST,
       payload: trip,
     });
   }

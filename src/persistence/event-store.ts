@@ -1,6 +1,6 @@
 import * as mongodb from 'mongodb';
-import { IEvent } from '../interfaces/event';
 import { IAggregate } from '../interfaces/aggregate';
+import { IEvent } from '../interfaces/event';
 
 let client: mongodb.MongoClient = null;
 
