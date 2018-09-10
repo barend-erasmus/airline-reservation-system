@@ -1,0 +1,12 @@
+POST http://127.0.0.1:3000/trip/seat/reserve HTTP/1.1
+content-type: application/json
+
+{
+    "id": "TRIP_CPT_DXB_2018_09_20",
+    "passengerId": "PASSENGER_ABC123456789"
+}
+
+###
+
+GET http://127.0.0.1:3000/trip?id=TRIP_CPT_DXB_2018_09_20 HTTP/1.1
+content-type: application/json
