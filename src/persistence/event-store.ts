@@ -11,8 +11,8 @@ export async function persistEvent(event: IEvent<any>): Promise<IEvent<any>> {
 
   const insertOneWriteOpResult: mongodb.InsertOneWriteOpResult = await collection.insertOne({
     aggregateId: event.aggregateId,
-    type: event.type,
     payload: event.payload,
+    type: event.type,
   });
 
   return {
@@ -52,10 +52,10 @@ export async function hydrateFromEventStore(
     const document: any = await cursor.next();
 
     const event: IEvent<any> = {
-      eventId: document._id.toHexString(),
       aggregateId: document.aggregateId,
-      type: document.type,
+      eventId: document._id.toHexString(),
       payload: document.payload,
+      type: document.type,
     };
 
     appliedAggregate = applyEvent(appliedAggregate, event);

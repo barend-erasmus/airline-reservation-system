@@ -9,19 +9,19 @@ export async function handlePassengerRegistrationRequestEvent(event: IEvent<any>
 
   if (existingPassenger) {
     await publishToEventBus({
-      eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.PASSENGER_REGISTRATION_REQUEST_FAILED,
+      eventId: null,
       payload: event.payload,
+      type: EventType.PASSENGER_REGISTRATION_REQUEST_FAILED,
     });
 
     return;
   }
 
   await publishToEventBus({
-    eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.PASSENGER_REGISTRATION_REQUEST_SUCCEEDED,
+    eventId: null,
     payload: event.payload,
+    type: EventType.PASSENGER_REGISTRATION_REQUEST_SUCCEEDED,
   });
 }

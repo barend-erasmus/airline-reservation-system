@@ -5,52 +5,54 @@ import { EventType } from './enums/event-type';
 import { IEvent } from './interfaces/event';
 import { getCollection, persistEvent } from './persistence/event-store';
 
-// const eventEmmiter: EventEmitter = new EventEmitter();
-
 const subscriptions: {} = {};
 
-// eventEmmiter.on('event', (event: IEvent<any>) => {
-//   console.log(`handling ${EventType[event.type]}`);
+export function initializeEventBus(): void {
+  // const eventEmmiter: EventEmitter = new EventEmitter();
 
-//   if (!subscriptions[event.type]) {
-//     subscriptions[event.type] = [];
-//   }
+  // eventEmmiter.on('event', (event: IEvent<any>) => {
+  //   console.log(`handling ${EventType[event.type]}`);
 
-//   for (const handler of subscriptions[event.type] as Array<(event: IEvent<any>) => Promise<void>>) {
-//     handler(event);
-//   }
-// });
+  //   if (!subscriptions[event.type]) {
+  //     subscriptions[event.type] = [];
+  //   }
 
-setInterval(async () => {
-  const collection: mongodb.Collection = await getCollection(COLLECTIONS.EVENT_BUS);
+  //   for (const handler of subscriptions[event.type] as Array<(event: IEvent<any>) => Promise<void>>) {
+  //     handler(event);
+  //   }
+  // });
 
-  const document: any = await collection.findOneAndDelete(
-    {},
-    {
-      sort: {
-        _id: 1,
+  setInterval(async () => {
+    const collection: mongodb.Collection = await getCollection(COLLECTIONS.EVENT_BUS);
+
+    const document: any = await collection.findOneAndDelete(
+      {},
+      {
+        sort: {
+          _id: 1,
+        },
       },
-    },
-  );
+    );
 
-  if (!document.value) {
-    return;
-  }
+    if (!document.value) {
+      return;
+    }
 
-  const event: IEvent<any> = {
-    ...document.value,
-  };
+    const event: IEvent<any> = {
+      ...document.value,
+    };
 
-  console.log(`handling ${EventType[event.type]}`);
+    console.log(`handling ${EventType[event.type]}`);
 
-  if (!subscriptions[event.type]) {
-    subscriptions[event.type] = [];
-  }
+    if (!subscriptions[event.type]) {
+      subscriptions[event.type] = [];
+    }
 
-  for (const handler of subscriptions[event.type] as Array<(event: IEvent<any>) => Promise<void>>) {
-    handler(event);
-  }
-}, 200);
+    for (const handler of subscriptions[event.type] as Array<(event: IEvent<any>) => Promise<void>>) {
+      handler(event);
+    }
+  }, 200);
+}
 
 export function subscribeToEventBus(eventType: EventType, handler: (event: IEvent<any>) => Promise<void>): void {
   if (!subscriptions[eventType]) {

@@ -14,14 +14,14 @@ export function applyEventToTrip(trip: ITrip, event: IEvent<any>): ITrip {
     case EventType.TRIP_SEAT_RESERVATION_REQUEST:
       return {
         ...trip,
-        numberOfSeatRemaining: trip.numberOfSeatRemaining - 1,
         lastAppliedEventId: event.eventId,
+        numberOfSeatRemaining: trip.numberOfSeatRemaining - 1,
       };
     case EventType.TRIP_SEAT_RESERVATION_REQUEST_FAILED:
       return {
         ...trip,
-        numberOfSeatRemaining: trip.numberOfSeatRemaining + 1,
         lastAppliedEventId: event.eventId,
+        numberOfSeatRemaining: trip.numberOfSeatRemaining + 1,
       };
     default:
       return trip;

@@ -9,20 +9,20 @@ export async function handleTripRegistrationRequestEvent(event: IEvent<any>): Pr
 
   if (existingTrip) {
     await publishToEventBus({
-      eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.TRIP_REGISTRATION_REQUEST_FAILED,
+      eventId: null,
       payload: event.payload,
+      type: EventType.TRIP_REGISTRATION_REQUEST_FAILED,
     });
 
     return;
   }
 
   await publishToEventBus({
-    eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.TRIP_REGISTRATION_REQUEST_SUCCEEDED,
+    eventId: null,
     payload: event.payload,
+    type: EventType.TRIP_REGISTRATION_REQUEST_SUCCEEDED,
   });
 }
 
@@ -35,19 +35,19 @@ export async function handleTripSeatReservationRequestEvent(event: IEvent<any>):
 
   if (existingTrip.numberOfSeatRemaining < 0) {
     await publishToEventBus({
-      eventId: null,
       aggregateId: event.aggregateId,
-      type: EventType.TRIP_SEAT_RESERVATION_REQUEST_FAILED,
+      eventId: null,
       payload: event.payload,
+      type: EventType.TRIP_SEAT_RESERVATION_REQUEST_FAILED,
     });
 
     return;
   }
 
   await publishToEventBus({
-    eventId: null,
     aggregateId: event.aggregateId,
-    type: EventType.TRIP_SEAT_RESERVATION_REQUEST_SUCCEEDED,
+    eventId: null,
     payload: event.payload,
+    type: EventType.TRIP_SEAT_RESERVATION_REQUEST_SUCCEEDED,
   });
 }
