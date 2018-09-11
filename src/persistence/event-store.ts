@@ -93,7 +93,8 @@ export async function persistSnapshot(type: string, aggregate: IAggregate): Prom
 export async function getCollection(collectionName: string = null): Promise<mongodb.Collection> {
   if (!client) {
     client = await mongodb.connect(
-      'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+      // 'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+      'mongodb://127.0.0.1:27017/test',
       { useNewUrlParser: true },
     );
   }
@@ -106,16 +107,3 @@ export async function getCollection(collectionName: string = null): Promise<mong
 
   return collection;
 }
-
-// export async function getCollection(): Promise<mongodb.Collection> {
-//   const client: mongodb.MongoClient = await mongodb.connect(
-//     'mongodb://127.0.0.1:27017/test',
-//     { useNewUrlParser: true },
-//   );
-
-//   const database: mongodb.Db = client.db('airline-reservation-system');
-
-//   const collection: mongodb.Collection = database.collection('events');
-
-//   return collection;
-// }

@@ -42,8 +42,6 @@ export function initializeEventBus(): void {
       ...document.value,
     };
 
-    console.log(`handling ${EventType[event.type]}`);
-
     if (!subscriptions[event.type]) {
       subscriptions[event.type] = [];
     }
@@ -51,7 +49,7 @@ export function initializeEventBus(): void {
     for (const handler of subscriptions[event.type] as Array<(event: IEvent<any>) => Promise<void>>) {
       handler(event);
     }
-  }, 200);
+  }, (Math.random() * 3000 + 3000));
 }
 
 export function subscribeToEventBus(eventType: EventType, handler: (event: IEvent<any>) => Promise<void>): void {

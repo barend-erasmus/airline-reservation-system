@@ -15,6 +15,7 @@ import {
 import { handlePassengerRegistrationRequestEvent } from './handlers/passenger';
 import { handleTripRegistrationRequestEvent, handleTripSeatReservationRequestEvent } from './handlers/trip';
 import { IAirlineReadModel } from './interfaces/airline-read-model';
+import { IEvent } from './interfaces/event';
 import { ITrip } from './interfaces/trip';
 import { getCollection } from './persistence/event-store';
 import { readModelListAirlines } from './read-models/airline';
@@ -29,6 +30,17 @@ function configureEventHandlers(): void {
   subscribeToEventBus(EventType.TRIP_REGISTRATION_REQUEST, handleTripRegistrationRequestEvent);
 
   subscribeToEventBus(EventType.TRIP_SEAT_RESERVATION_REQUEST, handleTripSeatReservationRequestEvent);
+
+  // Logging
+  const loggingHandler = async (event: IEvent<any>) => {
+    console.log(`[${cluster.worker.id}]: handling ${EventType[event.type]}`);
+  };
+
+  for (const event of Object.keys(EventType)
+    .map((key: string) => parseInt(key, 10))
+    .filter((value: number) => !isNaN(value))) {
+    subscribeToEventBus(event, loggingHandler);
+  }
 }
 
 async function dropAllCollections(): Promise<void> {
@@ -96,8 +108,8 @@ async function prepopulate(): Promise<void> {
 
 (async () => {
   if (cluster.isMaster) {
-    const cpus: number = 2; // os.cpus().length;
-    for (let i = 0; i < cpus; i += 1) {
+    const cpus: number = os.cpus().length;
+    for (let i = 0; i < cpus; i++) {
       cluster.fork();
     }
   } else {
@@ -117,9 +129,7 @@ async function prepopulate(): Promise<void> {
       response.json('OK');
     });
 
-    expressApplication
-    .route('/airlines')
-    .get(async (request: express.Request, response: express.Response) => {
+    expressApplication.route('/airlines').get(async (request: express.Request, response: express.Response) => {
       const airlines: Array<IAirlineReadModel> = await readModelListAirlines();
 
       response.json(airlines);
