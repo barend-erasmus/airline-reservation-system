@@ -38,6 +38,7 @@ export async function handleAirlineRegistrationRequestSucceededEvent(event: IEve
     company: event.payload.company,
     iataCode: event.payload.iataCode,
     icaoCode: event.payload.icaoCode,
+    id: event.payload.id,
   };
 
   await collection.insertOne(airlineReadModel);

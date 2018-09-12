@@ -6,6 +6,8 @@ const TRIP_SNAPSHOT: string = 'TRIP_SNAPSHOTS';
 
 const AIRLINE: string = 'AIRLINES';
 
+const TRIP: string = 'TRIPS';
+
 const EVENT_BUS: string = 'EVENT-BUS';
 
 export const COLLECTIONS = {
@@ -13,5 +15,6 @@ export const COLLECTIONS = {
   AIRLINE_SNAPSHOT,
   EVENT_BUS,
   PASSENGER_SNAPSHOT,
+  TRIP,
   TRIP_SNAPSHOT,
 };

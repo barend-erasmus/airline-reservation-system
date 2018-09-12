@@ -1,9 +1,9 @@
-GET http://127.0.0.1:3000/initialize HTTP/1.1
+GET http://127.0.0.1:3000/airlines HTTP/1.1
 content-type: application/json
 
 ###
 
-GET http://127.0.0.1:3000/airlines HTTP/1.1
+GET http://127.0.0.1:3000/trips HTTP/1.1
 content-type: application/json
 
 ###
@@ -12,7 +12,7 @@ POST http://127.0.0.1:3000/trip/seat/reserve HTTP/1.1
 content-type: application/json
 
 {
-    "id": "TRIP_CPT_DXB_2018_09_20",
+    "id": "TRIP_AER_KZN_2018_11_1_21_OZ5502",
     "passengerId": "PASSENGER_ABC123456789"
 }
 

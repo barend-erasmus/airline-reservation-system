@@ -1,4 +1,5 @@
 import * as mongodb from 'mongodb';
+import { retry } from '../helpers/retry';
 import { IAggregate } from '../interfaces/aggregate';
 import { IEvent } from '../interfaces/event';
 
@@ -92,11 +93,13 @@ export async function persistSnapshot(type: string, aggregate: IAggregate): Prom
 
 export async function getCollection(collectionName: string = null): Promise<mongodb.Collection> {
   if (!client) {
-    client = await mongodb.connect(
-      // 'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
-      'mongodb://127.0.0.1:27017/test',
-      { useNewUrlParser: true },
-    );
+    client = await retry<mongodb.MongoClient>(() => {
+      return mongodb.connect(
+        // 'mongodb+srv://airline-reservation-system:9j8r7YMAQyn^ZmfH@m001-sandbox-5lrbk.mongodb.net/test',
+        'mongodb://127.0.0.1:27017/test',
+        { useNewUrlParser: true },
+      );
+    });
   }
 
   if (!database) {

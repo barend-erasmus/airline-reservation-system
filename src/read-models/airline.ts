@@ -14,6 +14,7 @@ export async function readModelListAirlines(): Promise<Array<IAirlineReadModel>>
       company: document.company,
       iataCode: document.iataCode,
       icaoCode: document.icaoCode,
+      id: document.id,
     };
   });
 }

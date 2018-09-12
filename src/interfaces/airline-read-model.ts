@@ -1,4 +1,6 @@
 export interface IAirlineReadModel {
+  id: string;
+
   iataCode: string;
   icaoCode: string;
 

@@ -49,7 +49,7 @@ export function initializeEventBus(): void {
     for (const handler of subscriptions[event.type] as Array<(event: IEvent<any>) => Promise<void>>) {
       handler(event);
     }
-  }, (Math.random() * 3000 + 3000));
+  }, 300);
 }
 
 export function subscribeToEventBus(eventType: EventType, handler: (event: IEvent<any>) => Promise<void>): void {
