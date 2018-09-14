@@ -5,7 +5,7 @@ import { IEventHandler } from '../interfaces/event-handler';
 import { EventBus } from '../persistence/event-bus';
 import { EventStore } from '../persistence/event-store';
 
-export class AirlineRegistrationRequestEventHandler implements IEventHandler {
+export class AirlineUpdateRequestEventHandler implements IEventHandler {
   constructor(protected eventStore: EventStore) {}
 
   public async handle(eventBus: EventBus, event: IAirlineUpdateRequestEvent): Promise<void> {
