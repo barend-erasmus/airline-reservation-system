@@ -13,7 +13,7 @@
     "@types/mongodb": "^3.1.4"
   },
   "scripts": {
-    "start": "tsc & node ./dist/main.js"
+    "start": "tsc & node ./dist/oop/main.js"
   },
   "repository": {
     "type": "git",
